@@ -9,13 +9,13 @@ st.set_page_config(
     page_icon = ":apple:"
 )
 
-# Using object notation
+st.sidebar.title(f"Fresh or Stale Detection")
+
 add_selectbox = st.sidebar.selectbox(
     "Select a fruit or vegetable",
     ("Apple", "Banana", "Bitter Gourd", "Capsicum", "Orange", "Tomato")
 )
 
-# Using "with" notation
 with st.sidebar:
     add_radio = st.radio(
         "Select a model",
@@ -47,33 +47,29 @@ def hist_eq(img):
     return  cv2.resize(eq_color, (32,32)).flatten()
 
 uploaded_file = st.file_uploader("Upload an image...", type=["jpg", "jpeg", "webp"])
-# print(uploaded_file)
+
 if uploaded_file is not None:
     file_bytes = np.asarray(bytearray(uploaded_file.read()), dtype=np.uint8)
-    img = cv2.imdecode(file_bytes, 1)  # 1 means load color image
+    img = cv2.imdecode(file_bytes, 1) # 1 means load color image
     if add_radio == "Raw Pixel Model":
         pre = image_to_feature_vector(img)
-        pre = pre.reshape(1,-1)
     else:
         pre = hist_eq(img)
-        pre = pre.reshape(1,-1)
+    pre = pre.reshape(1,-1)
     prediction = model.predict(pre)
-    print('Prediction: ', prediction[0])
     probability_prediction = model.predict_proba(pre).max()
-    print('Probability: ', probability_prediction)
-    # Konversi hasil prediksi ke string
-    label = 'Label: '+prediction[0]
+    # Show Labels and Probability of Predictions
+    label = 'Prediction: '+prediction[0]
     probab = 'Probability: '+str(round(probability_prediction, 3))
-    # Tentukan font, skala, dan warna teks
+    # Determine the font, scale, color, and text position
     font = cv2.FONT_HERSHEY_SIMPLEX
     scale = 1
-    color = (0, 0, 0)  # Hitam
-    # Tentukan posisi teks pada gambar
+    color = (0, 0, 0)
     x1, y1 = 10, 30
     x2, y2 = 10, 60
-    # Tambahkan teks label ke gambar
-    img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)  # Convert BGR to RGB
+    # Add the label text to the picture
+    img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB) # Convert BGR to RGB
     cv2.putText(img, label, (x1, y1), font, scale, color, 2, cv2.LINE_AA)
     cv2.putText(img, probab, (x2, y2), font, scale, color, 2, cv2.LINE_AA)
-    # Tampilkan gambar dengan label
+    # Show images with labels
     st.image(img)
